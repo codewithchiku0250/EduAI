@@ -1,0 +1,828 @@
+
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EduAI - Study Assistant</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: #f8fafc;
+            color: #1e293b;
+            line-height: 1.6;
+        }
+
+        .app-container {
+            max-width: 480px;
+            margin: 0 auto;
+            background: white;
+            min-height: 100vh;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+            position: relative;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+            color: white;
+            padding: 20px;
+            text-align: center;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .header h1 {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+
+        .header p {
+            font-size: 0.9rem;
+            opacity: 0.9;
+        }
+
+        .main-content {
+            padding: 20px;
+            padding-bottom: 100px;
+        }
+
+        .subject-tabs {
+            display: flex;
+            overflow-x: auto;
+            gap: 10px;
+            margin-bottom: 20px;
+            padding: 10px 0;
+        }
+
+        .subject-tabs::-webkit-scrollbar {
+            display: none;
+        }
+
+        .subject-tab {
+            background: #f1f5f9;
+            border: none;
+            border-radius: 20px;
+            padding: 8px 16px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            color: #64748b;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            white-space: nowrap;
+            flex-shrink: 0;
+        }
+
+        .subject-tab.active {
+            background: #6366f1;
+            color: white;
+        }
+
+        .input-section {
+            background: white;
+            border-radius: 16px;
+            border: 1px solid #e2e8f0;
+            margin-bottom: 20px;
+            overflow: hidden;
+        }
+
+        .input-tabs {
+            display: flex;
+            background: #f8fafc;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .input-tab {
+            flex: 1;
+            padding: 12px;
+            background: none;
+            border: none;
+            font-size: 0.9rem;
+            font-weight: 500;
+            color: #64748b;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .input-tab.active {
+            background: white;
+            color: #6366f1;
+            border-bottom: 2px solid #6366f1;
+        }
+
+        .input-content {
+            padding: 20px;
+        }
+
+        .text-input {
+            display: block;
+        }
+
+        .image-input {
+            display: none;
+        }
+
+        textarea {
+            width: 100%;
+            border: none;
+            outline: none;
+            resize: vertical;
+            min-height: 120px;
+            font-size: 1rem;
+            font-family: inherit;
+            background: transparent;
+        }
+
+        textarea::placeholder {
+            color: #94a3b8;
+        }
+
+        .image-upload-area {
+            border: 2px dashed #cbd5e1;
+            border-radius: 12px;
+            padding: 40px 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            position: relative;
+        }
+
+        .image-upload-area:hover {
+            border-color: #6366f1;
+            background: #f8fafc;
+        }
+
+        .image-upload-area.dragover {
+            border-color: #6366f1;
+            background: #eff6ff;
+        }
+
+        .upload-icon {
+            font-size: 2rem;
+            color: #94a3b8;
+            margin-bottom: 10px;
+        }
+
+        .upload-text {
+            color: #64748b;
+            font-size: 0.9rem;
+            margin-bottom: 10px;
+        }
+
+        .upload-subtext {
+            color: #94a3b8;
+            font-size: 0.8rem;
+        }
+
+        .image-preview {
+            display: none;
+            position: relative;
+            margin-top: 15px;
+        }
+
+        .preview-image {
+            width: 100%;
+            max-height: 200px;
+            object-fit: cover;
+            border-radius: 8px;
+        }
+
+        .remove-image {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: rgba(0, 0, 0, 0.7);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            cursor: pointer;
+            font-size: 1.2rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .hidden-file-input {
+            display: none;
+        }
+
+        .submit-button {
+            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            padding: 16px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .submit-button:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+        }
+
+        .submit-button:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 30px;
+            color: #64748b;
+        }
+
+        .spinner {
+            border: 3px solid #f1f5f9;
+            border-top: 3px solid #6366f1;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 15px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .answer-section {
+            background: white;
+            border-radius: 16px;
+            border: 1px solid #e2e8f0;
+            padding: 20px;
+            margin-bottom: 20px;
+            display: none;
+        }
+
+        .answer-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .answer-header h3 {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #1e293b;
+        }
+
+        .answer-content {
+            color: #475569;
+            font-size: 0.95rem;
+            line-height: 1.7;
+        }
+
+        .answer-content h3 {
+            color: #1e293b;
+            font-size: 1rem;
+            margin: 20px 0 10px 0;
+            font-weight: 600;
+        }
+
+        .answer-content ul, .answer-content ol {
+            margin: 10px 0 10px 20px;
+        }
+
+        .answer-content li {
+            margin-bottom: 5px;
+        }
+
+        .answer-content code {
+            background: #f1f5f9;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: 'SF Mono', Monaco, monospace;
+            font-size: 0.9rem;
+        }
+
+        .answer-content pre {
+            background: #1e293b;
+            color: #f8fafc;
+            padding: 16px;
+            border-radius: 8px;
+            overflow-x: auto;
+            margin: 15px 0;
+            font-size: 0.9rem;
+        }
+
+        .error-message {
+            background: #fef2f2;
+            color: #dc2626;
+            padding: 12px 16px;
+            border-radius: 8px;
+            margin-top: 10px;
+            border-left: 4px solid #dc2626;
+            font-size: 0.9rem;
+        }
+
+        .success-icon {
+            color: #10b981;
+            font-size: 1.2rem;
+        }
+
+        @media (max-width: 480px) {
+            .app-container {
+                max-width: 100%;
+                box-shadow: none;
+            }
+
+            .main-content {
+                padding: 15px;
+            }
+
+            .input-content {
+                padding: 15px;
+            }
+
+            .subject-tabs {
+                margin: 0 -20px 20px;
+                padding: 10px 20px;
+            }
+        }
+
+        /* Dark mode support */
+        @media (prefers-color-scheme: dark) {
+            body {
+                background: #0f172a;
+                color: #e2e8f0;
+            }
+
+            .app-container {
+                background: #1e293b;
+            }
+
+            .input-section, .answer-section {
+                background: #334155;
+                border-color: #475569;
+            }
+
+            .input-tabs {
+                background: #475569;
+                border-color: #64748b;
+            }
+
+            .input-tab {
+                color: #cbd5e1;
+            }
+
+            .input-tab.active {
+                background: #334155;
+                color: #6366f1;
+            }
+
+            .subject-tab {
+                background: #475569;
+                color: #cbd5e1;
+            }
+
+            textarea {
+                color: #e2e8f0;
+            }
+
+            textarea::placeholder {
+                color: #64748b;
+            }
+
+            .image-upload-area {
+                border-color: #64748b;
+            }
+
+            .image-upload-area:hover {
+                background: #334155;
+            }
+
+            .upload-icon, .upload-text {
+                color: #94a3b8;
+            }
+
+            .upload-subtext {
+                color: #64748b;
+            }
+
+            .answer-content {
+                color: #cbd5e1;
+            }
+
+            .answer-content h3 {
+                color: #e2e8f0;
+            }
+
+            .answer-content code {
+                background: #475569;
+                color: #e2e8f0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <div class="header">
+            <h1>🧠 EduAI</h1>
+            <p>Your intelligent study assistant</p>
+        </div>
+
+        <div class="main-content">
+            <div class="subject-tabs">
+                <button class="subject-tab active" data-subject="general">📚 General</button>
+                <button class="subject-tab" data-subject="hindi">🇮🇳 Hindi</button>
+                <button class="subject-tab" data-subject="english">🇬🇧 English</button>
+                <button class="subject-tab" data-subject="math">🔢 Math</button>
+                <button class="subject-tab" data-subject="physics">⚛️ Physics</button>
+                <button class="subject-tab" data-subject="chemistry">🧪 Chemistry</button>
+                <button class="subject-tab" data-subject="biology">🧬 Biology</button>
+                <button class="subject-tab" data-subject="history">📖 History</button>
+            </div>
+
+            <div class="input-section">
+                <div class="input-tabs">
+                    <button class="input-tab active" data-tab="text">
+                        💬 Text Question
+                    </button>
+                    <button class="input-tab" data-tab="image">
+                        📷 Image Question
+                    </button>
+                </div>
+
+                <div class="input-content">
+                    <div class="text-input" id="textInput">
+                        <textarea id="questionText" placeholder="Ask your question here...
+Examples:
+• Explain photosynthesis in plants
+• Solve: 2x + 5 = 15
+• हिंदी में समझाएं कि वर्षा कैसे होती है?"></textarea>
+                    </div>
+
+                    <div class="image-input" id="imageInput">
+                        <div class="image-upload-area" id="uploadArea">
+                            <div class="upload-icon">📸</div>
+                            <div class="upload-text">Tap to upload an image</div>
+                            <div class="upload-subtext">Questions, diagrams, problems, handwritten notes</div>
+                        </div>
+                        <div class="image-preview" id="imagePreview">
+                            <img class="preview-image" id="previewImage" alt="Preview">
+                            <button class="remove-image" id="removeImage">×</button>
+                        </div>
+                        <input type="file" class="hidden-file-input" id="fileInput" accept="image/*">
+                        <textarea id="imageQuestionText" placeholder="Ask about this image... (optional)" style="margin-top: 15px; min-height: 80px;"></textarea>
+                    </div>
+                </div>
+            </div>
+
+            <button class="submit-button" id="submitBtn">
+                <span>✨ Get Answer</span>
+            </button>
+
+            <div class="loading" id="loading">
+                <div class="spinner"></div>
+                <p>Analyzing your question...</p>
+            </div>
+
+            <div class="answer-section" id="answerSection">
+                <div class="answer-header">
+                    <span class="success-icon">✅</span>
+                    <h3>Answer</h3>
+                </div>
+                <div class="answer-content" id="answerContent"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        class QuestionAI {
+            constructor() {
+                this.apiKey = 'AIzaSyBVFvgEoULq0g0r39iydWv5RP9ot_pBC7I;
+                this.selectedSubject = 'general';
+                this.currentInputType = 'text';
+                this.uploadedImage = null;
+                this.apiUrl = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent';
+                this.initializeEventListeners();
+            }
+
+            initializeEventListeners() {
+                // Subject tabs
+                const subjectTabs = document.querySelectorAll('.subject-tab');
+                subjectTabs.forEach(tab => {
+                    tab.addEventListener('click', (e) => {
+                        subjectTabs.forEach(t => t.classList.remove('active'));
+                        e.target.classList.add('active');
+                        this.selectedSubject = e.target.dataset.subject;
+                    });
+                });
+
+                // Input type tabs
+                const inputTabs = document.querySelectorAll('.input-tab');
+                inputTabs.forEach(tab => {
+                    tab.addEventListener('click', (e) => {
+                        inputTabs.forEach(t => t.classList.remove('active'));
+                        e.target.classList.add('active');
+                        this.currentInputType = e.target.dataset.tab;
+                        this.switchInputType();
+                    });
+                });
+
+                // Image upload
+                const uploadArea = document.getElementById('uploadArea');
+                const fileInput = document.getElementById('fileInput');
+                const removeImageBtn = document.getElementById('removeImage');
+
+                uploadArea.addEventListener('click', () => fileInput.click());
+                uploadArea.addEventListener('dragover', this.handleDragOver.bind(this));
+                uploadArea.addEventListener('dragleave', this.handleDragLeave.bind(this));
+                uploadArea.addEventListener('drop', this.handleDrop.bind(this));
+                fileInput.addEventListener('change', this.handleFileSelect.bind(this));
+                removeImageBtn.addEventListener('click', this.removeImage.bind(this));
+
+                // Submit button
+                const submitBtn = document.getElementById('submitBtn');
+                submitBtn.addEventListener('click', () => this.handleSubmit());
+
+                // Enter key shortcuts
+                document.addEventListener('keydown', (e) => {
+                    if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) {
+                        this.handleSubmit();
+                    }
+                });
+            }
+
+            switchInputType() {
+                const textInput = document.getElementById('textInput');
+                const imageInput = document.getElementById('imageInput');
+                
+                if (this.currentInputType === 'text') {
+                    textInput.style.display = 'block';
+                    imageInput.style.display = 'none';
+                } else {
+                    textInput.style.display = 'none';
+                    imageInput.style.display = 'block';
+                }
+            }
+
+            handleDragOver(e) {
+                e.preventDefault();
+                e.currentTarget.classList.add('dragover');
+            }
+
+            handleDragLeave(e) {
+                e.currentTarget.classList.remove('dragover');
+            }
+
+            handleDrop(e) {
+                e.preventDefault();
+                e.currentTarget.classList.remove('dragover');
+                const files = e.dataTransfer.files;
+                if (files.length > 0) {
+                    this.processFile(files[0]);
+                }
+            }
+
+            handleFileSelect(e) {
+                const files = e.target.files;
+                if (files.length > 0) {
+                    this.processFile(files[0]);
+                }
+            }
+
+            processFile(file) {
+                if (!file.type.startsWith('image/')) {
+                    this.showError('Please select an image file');
+                    return;
+                }
+
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    this.uploadedImage = e.target.result;
+                    this.showImagePreview(e.target.result);
+                };
+                reader.readAsDataURL(file);
+            }
+
+            showImagePreview(imageSrc) {
+                const preview = document.getElementById('imagePreview');
+                const previewImage = document.getElementById('previewImage');
+                const uploadArea = document.getElementById('uploadArea');
+                
+                previewImage.src = imageSrc;
+                preview.style.display = 'block';
+                uploadArea.style.display = 'none';
+            }
+
+            removeImage() {
+                const preview = document.getElementById('imagePreview');
+                const uploadArea = document.getElementById('uploadArea');
+                const fileInput = document.getElementById('fileInput');
+                
+                this.uploadedImage = null;
+                preview.style.display = 'none';
+                uploadArea.style.display = 'block';
+                fileInput.value = '';
+            }
+
+            async handleSubmit() {
+                let question = '';
+                
+                if (this.currentInputType === 'text') {
+                    question = document.getElementById('questionText').value.trim();
+                    if (!question) {
+                        this.showError('Please enter your question!');
+                        return;
+                    }
+                } else {
+                    if (!this.uploadedImage) {
+                        this.showError('Please upload an image!');
+                        return;
+                    }
+                    question = document.getElementById('imageQuestionText').value.trim() || 'Analyze this image and answer any questions or explain what you see.';
+                }
+
+                this.showLoading(true);
+                this.hideError();
+
+                try {
+                    const answer = await this.getAnswer(question);
+                    this.showAnswer(answer);
+                } catch (error) {
+                    this.showError(error.message);
+                } finally {
+                    this.showLoading(false);
+                }
+            }
+
+            async getAnswer(question) {
+                const prompt = this.buildPrompt(question);
+                const requestBody = {
+                    contents: [{
+                        parts: [
+                            { text: prompt }
+                        ]
+                    }],
+                    generationConfig: {
+                        temperature: 0.7,
+                        topK: 40,
+                        topP: 0.95,
+                        maxOutputTokens: 2048,
+                    }
+                };
+
+                // Add image if present
+                if (this.uploadedImage) {
+                    const base64Data = this.uploadedImage.split(',')[1];
+                    const mimeType = this.uploadedImage.split(';')[0].split(':')[1];
+                    
+                    requestBody.contents[0].parts.push({
+                        inlineData: {
+                            mimeType: mimeType,
+                            data: base64Data
+                        }
+                    });
+                }
+
+                const response = await fetch(`${this.apiUrl}?key=${this.apiKey}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(requestBody)
+                });
+
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.error?.message || 'Failed to get response from AI');
+                }
+
+                const data = await response.json();
+                
+                if (!data.candidates || !data.candidates[0] || !data.candidates[0].content) {
+                    throw new Error('No valid response received from AI');
+                }
+
+                return data.candidates[0].content.parts[0].text;
+            }
+
+            buildPrompt(question) {
+                const subjectContext = {
+                    general: "You are a helpful educational assistant. Answer questions clearly and comprehensively.",
+                    hindi: "आप एक हिंदी शिक्षा सहायक हैं। सवालों का जवाब हिंदी में स्पष्ट और विस्तार से दें।",
+                    english: "You are an English language and literature expert. Help with grammar, vocabulary, literature analysis, and writing.",
+                    math: "You are a mathematics expert. Solve problems step-by-step, show your work, and explain concepts clearly.",
+                    physics: "You are a physics expert. Explain concepts with examples, solve problems with clear steps, and use appropriate units.",
+                    chemistry: "You are a chemistry expert. Explain chemical concepts, reactions, and solve problems with detailed steps.",
+                    biology: "You are a biology expert. Explain biological concepts, processes, and systems in detail with examples.",
+                    history: "You are a history expert. Provide accurate historical information with context and significance.",
+                    geography: "You are a geography expert. Explain geographical concepts, locations, and phenomena clearly."
+                };
+
+                const context = subjectContext[this.selectedSubject] || subjectContext.general;
+                
+                let prompt = `${context}\n\nQuestion: ${question}\n\n`;
+                
+                if (this.uploadedImage) {
+                    prompt += "Please analyze the uploaded image and provide a detailed answer. If there are any problems, questions, or text in the image, solve or explain them step by step.\n\n";
+                }
+                
+                prompt += "Please provide a detailed, accurate, and helpful answer. If it's a math or science problem, show step-by-step solutions. If it's a concept explanation, use examples and clear language.";
+                
+                return prompt;
+            }
+
+            showAnswer(answer) {
+                const answerSection = document.getElementById('answerSection');
+                const answerContent = document.getElementById('answerContent');
+                
+                const formattedAnswer = this.formatAnswer(answer);
+                answerContent.innerHTML = formattedAnswer;
+                
+                answerSection.style.display = 'block';
+                answerSection.scrollIntoView({ behavior: 'smooth' });
+            }
+
+            formatAnswer(answer) {
+                let formatted = answer
+                    .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+                    .replace(/\*(.*?)\*/g, '<em>$1</em>')
+                    .replace(/`(.*?)`/g, '<code>$1</code>')
+                    .replace(/^### (.*$)/gm, '<h3>$1</h3>')
+                    .replace(/^## (.*$)/gm, '<h3>$1</h3>')
+                    .replace(/^# (.*$)/gm, '<h3>$1</h3>')
+                    .replace(/\n\n/g, '</p><p>')
+                    .replace(/^\* (.*$)/gm, '<li>$1</li>')
+                    .replace(/^- (.*$)/gm, '<li>$1</li>')
+                    .replace(/^\d+\. (.*$)/gm, '<li>$1</li>');
+
+                formatted = '<p>' + formatted + '</p>';
+                formatted = formatted.replace(/(<li>.*<\/li>)/gs, (match) => {
+                    return '<ul>' + match + '</ul>';
+                });
+
+                return formatted;
+            }
+
+            showLoading(show) {
+                const loading = document.getElementById('loading');
+                const submitBtn = document.getElementById('submitBtn');
+                
+                if (show) {
+                    loading.style.display = 'block';
+                    submitBtn.disabled = true;
+                    submitBtn.innerHTML = '<span>🤔 Thinking...</span>';
+                } else {
+                    loading.style.display = 'none';
+                    submitBtn.disabled = false;
+                    submitBtn.innerHTML = '<span>✨ Get Answer</span>';
+                }
+            }
+
+            showError(message) {
+                const existingError = document.querySelector('.error-message');
+                if (existingError) {
+                    existingError.remove();
+                }
+
+                const errorDiv = document.createElement('div');
+                errorDiv.className = 'error-message';
+                errorDiv.textContent = message;
+                
+                const submitBtn = document.getElementById('submitBtn');
+                submitBtn.parentNode.insertBefore(errorDiv, submitBtn.nextSibling);
+            }
+
+            hideError() {
+                const errorMessage = document.querySelector('.error-message');
+                if (errorMessage) {
+                    errorMessage.remove();
+                }
+            }
+        }
+
+        // Initialize the application
+        document.addEventListener('DOMContentLoaded', () => {
+            new QuestionAI();
+        });
+    </script>
+</body>
+</html>
